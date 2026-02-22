@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+        - "8080:8080"
+    networks:
+      - heart_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+        - "8501:8501"
+    depends_on:
+      - api
+    networks:
+        - heart_network
+networks:
+    heart_network:
+        driver: bridge
