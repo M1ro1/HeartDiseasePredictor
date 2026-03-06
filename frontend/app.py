@@ -8,7 +8,7 @@ st.markdown("""
 Enter your medical data on the left to get the model's prediction and an explanation of which factors most influenced the result..
 """)
 
-API_URL = 'http://api:8080/predict'
+API_URL = 'http://api:8000/predict'
 
 st.sidebar.header("Patient Data")
 
