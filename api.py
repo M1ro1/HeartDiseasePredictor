@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.responses import RedirectResponse
+
 import pandas as pd
 import joblib
 import shap
@@ -37,6 +39,10 @@ class PatientData(BaseModel):
     oldpeak:float
     slope:str
 
+
+@app.get("/")
+def home_page():
+    return RedirectResponse(url='/predict')
 
 @app.post("/predict")
 def predict(data: PatientData):
