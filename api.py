@@ -11,6 +11,8 @@ import io
 import base64
 import os
 
+from backend.generate_pdf_file import PatientDataFile
+
 matplotlib.use('Agg')
 
 app = FastAPI(title="Heart Disease API")
@@ -78,8 +80,14 @@ def predict(data: PatientData):
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
     plt.close(fig)
 
+    generated_file = PatientDataFile.generate_pdf(input, probability, img_base64)
+
+    pdf_base64 = base64.b64encode(generated_file).decode('utf-8')
+
     return {
         "prediction": prediction,
         "probability": probability,
-        'shap_plot': img_base64}
+        'shap_plot': img_base64,
+        'patient_data_file': pdf_base64
+    }
 

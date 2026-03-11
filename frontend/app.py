@@ -50,6 +50,7 @@ if predict_btn:
             result = response.json()
             probability = result['probability']
             img_base64 = result['shap_plot']
+            generated_pdf_file = result['patient_data_file']
 
             st.divider()
             col1,col2 = st.columns([1,2])
@@ -65,6 +66,16 @@ if predict_btn:
                 else:
                     st.success(f"**Low risk!**\n\nProbability of disease: **{probability:.1f}%**")
                     st.info("Your numbers look good. Continue to lead a healthy lifestyle!")
+
+                pdf_bytes = base64.b64decode(generated_pdf_file)
+
+                st.download_button(
+                    label="📄 Download Report (PDF)",
+                    data=pdf_bytes,
+                    file_name="heart_disease_report.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
 
             with col2:
                 st.subheader("Why did the model decide that? (XAI)")
