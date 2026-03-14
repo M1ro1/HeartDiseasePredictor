@@ -1,42 +1,39 @@
 import streamlit as st
 
-st.set_page_config(page_title='Heart Disease Predictor | Home', page_icon='🫀', layout='wide')
-
 st.markdown("<h1 style='text-align: center; color: #ff4b4b;'>🫀 AI Heart Disease Risk Analyzer</h1>",
             unsafe_allow_html=True)
 st.markdown(
-    "<h4 style='text-align: center; color: gray;'>Надійний інструмент для аналізу серцево-судинних ризиків на базі машинного навчання</h4>",
+    "<h4 style='text-align: center; color: gray;'>A reliable tool for cardiovascular risk analysis based on machine learning</h4>",
     unsafe_allow_html=True)
 st.write("---")
 
 col1, col2 = st.columns([1.2, 1], gap="large")
 
 with col1:
-    st.subheader("Про проєкт")
+    st.subheader("About project")
     st.write("""
-    Цей додаток використовує передові алгоритми машинного навчання для оцінки ймовірності наявності серцево-судинних захворювань на основі ваших клінічних показників.
+    This app uses advanced machine learning algorithms to estimate your risk of cardiovascular disease based on your clinical indicators.
 
-    Наш інструмент не просто видає "сухі" цифри, а й пояснює, які саме фактори (наприклад, рівень холестерину чи тиск) найбільше вплинули на результат.
+    Our tool doesn't just give you raw numbers, it also explains which factors (like cholesterol or blood pressure) have the most impact on your outcome.
     """)
 
     st.markdown("""
-    **Ключові можливості:**
-    * 🩸 **Комплексний аналіз:** Враховує 11 медичних параметрів (ЕКГ, тип болю, рівень цукру тощо).
-    * 🧠 **Explainable AI (XAI):** Інтегровані графіки SHAP дозволяють "заглянути під капот" штучного інтелекту.
-    * ⚡ **Швидкість:** Миттєві результати завдяки оптимізованому FastAPI бекенду.
+    **Key Features:**
+    * 🩸 **Comprehensive Analysis:** Takes into account 11 medical parameters (ECG, pain type, sugar level, etc.).
+    * 🧠 **Explainable AI (XAI):** Integrated SHAP graphs allow you to "look under the hood" of artificial intelligence.
     """)
 
 with col2:
     st.info("""
-    **💡 Цікавий факт:**
-    Серцево-судинні захворювання є провідною причиною проблем зі здоров'ям у світі. Рання діагностика та контроль факторів ризику можуть значно покращити якість життя.
+    **💡 Interesting fact:**
+    Cardiovascular disease is the leading cause of health problems in the world. Early diagnosis and control of risk factors can significantly improve quality of life.
     """)
 
-    st.warning("""
-    **⚠️ Медичне застереження**\n
-    Цей додаток створено виключно в **освітніх та інформаційних цілях**. 
-    Він НЕ є заміною професійної медичної консультації, діагностики або лікування. 
-    Завжди звертайтеся до свого лікаря перед ухваленням будь-яких рішень щодо вашого здоров'я.
+    st.warning(""" 
+    **⚠️ Medical Disclaimer**\n
+    This app is for **educational and informational purposes only**. 
+    It is NOT a substitute for professional medical advice, diagnosis, or treatment. 
+    Always consult your doctor before making any decisions regarding your health.
     """)
 
 st.write("---")
@@ -45,7 +42,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 col_empty1, col_cta, col_empty2 = st.columns([1, 2, 1])
 
 with col_cta:
-    st.markdown("<h3 style='text-align: center;'>Готові перевірити показники?</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center;'>Ready to check the metrics?</h3>", unsafe_allow_html=True)
 
-    if st.button("🚀 Перейди до панелі прогнозування", type="primary", use_container_width=True):
+    if st.button("🚀 Go to the forecast panel", type="primary", use_container_width=True):
         st.switch_page("app.py")

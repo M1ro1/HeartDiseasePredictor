@@ -1,14 +1,17 @@
 import streamlit as st
 import requests
 import base64
+import os
+from dotenv import load_dotenv
 
-st.set_page_config(page_title='Heart Disease Predictor', page_icon='🫀', layout='wide')
+load_dotenv()
+
 st.title("Heart-disease risk analyzer")
 st.markdown("""
 Enter your medical data on the left to get the model's prediction and an explanation of which factors most influenced the result..
 """)
 
-API_URL = 'http://api:8000/predict'
+API_URL =os.getenv('API_URL', 'http://127.0.0.1:8000/predict')
 
 st.sidebar.header("Patient Data")
 
@@ -41,7 +44,7 @@ if predict_btn:
             'oldpeak': oldpeak,
             'slope': slope
         }
-
+    
 
     with st.spinner("Getting a prediction from the model..."):
         try:

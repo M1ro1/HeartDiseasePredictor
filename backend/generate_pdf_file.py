@@ -1,7 +1,6 @@
 from fpdf import FPDF
 import base64
-import tempfile
-import os
+import io
 
 class PatientDataFile:
 
@@ -43,13 +42,10 @@ class PatientDataFile:
             pdf.cell(0, 10, txt="Model Explanation (SHAP):", ln=True)
 
             img_data = base64.b64decode(img_base64)
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
-                tmp_file.write(img_data)
-                tmp_file_path = tmp_file.name
+            img_stream = io.BytesIO(img_data)
 
-            pdf.image(tmp_file_path, w=170)
+            pdf.image(img_stream, w=170)
 
-            os.remove(tmp_file_path)
 
         return bytes(pdf.output())
 

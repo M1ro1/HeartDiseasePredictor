@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 
 def load_dataset(path: str):
@@ -26,8 +27,6 @@ def prepare_X_y(df: pd.DataFrame):
 
 
 def split_data(X, y, test_size=0.15, val_share_of_rest=0.17647058823529413, random_state=43):
-    from sklearn.model_selection import train_test_split
-
     X_train_val, X_test, y_train_val, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state, stratify=y
     )

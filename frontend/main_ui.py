@@ -5,5 +5,5 @@ predict_page = st.Page("app.py", title="Prediction", icon="🫀")
 
 pg = st.navigation([home_page, predict_page])
 
-st.set_page_config(page_title='Heart Disease Prediction', layout='wide')
+st.set_page_config(page_title='Heart Disease Prediction', page_icon='🫀', layout='wide')
 pg.run()

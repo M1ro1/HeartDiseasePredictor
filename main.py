@@ -12,6 +12,9 @@ from backend.models import tune_models
 from backend.explainability import explain_model_shap
 from backend.utils import save_full_dataset
 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class HeartDiseasePipeline:
     def __init__(self, data_path: str, output_dir: str = './misc/' ):
