@@ -11,7 +11,7 @@ st.markdown("""
 Enter your medical data on the left to get the model's prediction and an explanation of which factors most influenced the result..
 """)
 
-API_URL =os.getenv('API_URL', 'http://127.0.0.1:8000/predict')
+API_URL =os.getenv('API_REG_URL', 'http://127.0.0.1:8000/predict')
 
 st.sidebar.header("Patient Data")
 
