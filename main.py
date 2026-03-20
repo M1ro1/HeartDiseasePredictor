@@ -6,15 +6,17 @@ from mlxtend.evaluate import mcnemar_table, mcnemar
 import joblib
 from sklearn.metrics import accuracy_score, recall_score, roc_auc_score, precision_score, f1_score, confusion_matrix
 
-from backend.data import load_dataset, prepare_X_y, split_data
-from backend.preprocessing import build_preprocessors, apply_preprocessors
-from backend.models import tune_models
-from backend.explainability import explain_model_shap
-from backend.utils import save_full_dataset
+from backend.app.ml import load_dataset, prepare_X_y, split_data
+from backend.app.ml import build_preprocessors, apply_preprocessors
+from backend.app.ml import tune_models
+from backend.app.ml import explain_model_shap
+from backend.app.ml import save_full_dataset
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+os.environ['LOKY_MAX_CPU_COUNT'] = '1'
 
 class HeartDiseasePipeline:
     def __init__(self, data_path: str, output_dir: str = './misc/' ):

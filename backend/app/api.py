@@ -1,9 +1,9 @@
 import threading
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.responses import RedirectResponse
+from fastapi import FastAPI,Depends, HTTPException, status
 
 import pandas as pd
 import joblib
@@ -15,15 +15,22 @@ import base64
 import os
 import asyncio
 
-from backend.generate_pdf_file import PatientDataFile
+from .ml.generate_pdf_file import PatientDataFile
 from dotenv import load_dotenv
+
+from .db.schemas import UserOut, UserCreate
+from .db.crud import create_user, get_user_by_username
+from .db.database import get_db
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 load_dotenv()
 
 matplotlib.use('Agg')
 
-MODEL_PATH = os.getenv('MODEL_PATH', './misc/random_forest_model.joblib')
-PREPROCESSOR_PATH = os.getenv('PREPROCESSOR_PATH', './misc/preprocessor.joblib')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+MODEL_PATH = os.path.join(BASE_DIR, 'misc', 'random_forest_model.joblib')
+PREPROCESSOR_PATH = os.path.join(BASE_DIR, 'misc', 'preprocessor.joblib')
 
 plt_lock = threading.Lock()
 
@@ -78,6 +85,20 @@ def generate_shap_plot(explainer, processed_df):
 @app.get("/")
 def home_page():
     return RedirectResponse(url='/predict')
+
+@app.post("/registration", response_model=UserOut)
+async def register_user(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
+
+    existing_user = await get_user_by_username(db, user_data.username)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User with this username already exists"
+        )
+
+    new_user = await create_user(db, user_data)
+
+    return new_user
 
 @app.post("/predict")
 async def predict(data: PatientData):
