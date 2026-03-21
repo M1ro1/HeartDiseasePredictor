@@ -47,9 +47,9 @@ with col_cta:
     btn_col1, btn_col2 = st.columns(2)
 
     with btn_col1:
-        if st.button("🚀 Start Prediction", type="primary", use_container_width=True):
+        if st.button("🚀 Go to the forecast panel", type="primary", use_container_width=True):
             st.switch_page("app.py")
 
     with btn_col2:
         if st.button("📝 Sign Up Now", use_container_width=True):
-            st.switch_page("registration.py")
+            st.switch_page("auth.py")

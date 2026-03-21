@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from .models import UserTable
 from .schemas import UserCreate
-from ..security import password_hash
+from ..security import password_hash, verify_password
 
 async def get_user_by_username(db: AsyncSession, username: str):
     query = select(UserTable).where(UserTable.username == username)
@@ -23,3 +23,11 @@ async def create_user(db: AsyncSession, user_data: UserCreate):
     await db.commit()
     await db.refresh(new_user)
     return new_user
+
+async def login_user(db: AsyncSession, username: str, password_attempt: str):
+    user_info = await get_user_by_username(db, username)
+
+    if user_info is None or not (verify_password(password_attempt, user_info.hashed_password)):
+        return False
+
+    return user_info

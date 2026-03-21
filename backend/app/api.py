@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from fastapi.responses import RedirectResponse
 from fastapi import FastAPI,Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 
 import pandas as pd
 import joblib
@@ -19,7 +20,7 @@ from .ml.generate_pdf_file import PatientDataFile
 from dotenv import load_dotenv
 
 from .db.schemas import UserOut, UserCreate
-from .db.crud import create_user, get_user_by_username
+from .db.crud import create_user, get_user_by_username, login_user
 from .db.database import get_db
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -99,6 +100,20 @@ async def register_user(user_data: UserCreate, db: AsyncSession = Depends(get_db
     new_user = await create_user(db, user_data)
 
     return new_user
+
+@app.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends(),
+                db: AsyncSession = Depends(get_db)):
+    user = await login_user(db, form_data.username, form_data.password)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return {"access_token": "fake-token-for-now", "token_type": "bearer"}
 
 @app.post("/predict")
 async def predict(data: PatientData):
