@@ -15,15 +15,19 @@ import io
 import base64
 import os
 import asyncio
+import uuid
+from typing import Optional
 
 from .ml.generate_pdf_file import PatientDataFile
 from dotenv import load_dotenv
 
-from .db.schemas import UserOut, UserCreate
-from .db.crud import create_user, get_user_by_username, login_user
+from .db.schemas import UserOut, UserCreate, HistoryRead
+from .db.crud import create_user, get_user_by_username, login_user, get_current_user
 from .db.database import get_db
+from .db.models import UserTable, AnalysisHistory
 
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 load_dotenv()
 
@@ -104,6 +108,7 @@ async def register_user(user_data: UserCreate, db: AsyncSession = Depends(get_db
 @app.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends(),
                 db: AsyncSession = Depends(get_db)):
+
     user = await login_user(db, form_data.username, form_data.password)
 
     if not user:
@@ -112,11 +117,24 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(),
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    session_token = str(uuid.uuid4())
 
-    return {"access_token": "fake-token-for-now", "token_type": "bearer"}
+    user.session_token = session_token
 
+    await db.commit()
+    await db.refresh(user)
+
+    return {
+        "access_token": session_token,
+        "token_type": "bearer",
+        "username": user.username
+    }
 @app.post("/predict")
-async def predict(data: PatientData):
+async def predict(data: PatientData,
+                  db: AsyncSession = Depends(get_db),
+                  user: Optional[UserTable] = Depends(get_current_user)
+                  ):
+
     model = app.state.model
     preprocessor = app.state.preprocessor
     explainer = app.state.explainer
@@ -141,6 +159,17 @@ async def predict(data: PatientData):
 
     pdf_base64 = base64.b64encode(generated_file).decode('utf-8')
 
+    if user:
+        new_history = AnalysisHistory(
+            user_id=user.id,
+            input_data=data.dict(),
+            probability=probability,
+            prediction=prediction,
+            shap_image_base64=img_base64
+        )
+        db.add(new_history)
+        await db.commit()
+
     return {
         "prediction": prediction,
         "probability": probability,
@@ -148,3 +177,22 @@ async def predict(data: PatientData):
         'patient_data_file': pdf_base64
     }
 
+@app.get("/history", response_model=list[HistoryRead])
+async def get_history(
+        db: AsyncSession = Depends(get_db),
+        user: UserTable = Depends(get_current_user)
+):
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authorized")
+
+    query = (
+        select(AnalysisHistory)
+        .where(AnalysisHistory.user_id == user.id)
+        .order_by(AnalysisHistory.created_at.desc())
+    )
+
+    result = await db.execute(query)
+    history_list = result.scalars().all()
+
+    return history_list

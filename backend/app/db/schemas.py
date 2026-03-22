@@ -13,3 +13,13 @@ class UserOut(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class HistoryRead(BaseModel):
+    id: int
+    input_data: dict
+    probability: float
+    prediction: int
+    shap_image_base64: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
