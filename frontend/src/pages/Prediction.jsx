@@ -57,6 +57,18 @@ export default function Prediction() {
     }
   };
 
+  const handleDownloadPDF = (base64String, filename = 'Heart_Analysis_Report.pdf') => {
+    if (!base64String) {
+      alert("A PDF report is not available for this record. It may not have been saved to history.");
+      return;
+    }
+    const linkSource = `data:application/pdf;base64,${base64String}`;
+    const downloadLink = document.createElement("a");
+    downloadLink.href = linkSource;
+    downloadLink.download = filename;
+    downloadLink.click();
+  };
+
   const inputClass = "w-full border border-gray-300 rounded-lg p-2.5 focus:ring-red-500 focus:border-red-500 shadow-sm bg-gray-50 text-gray-900";
   const labelClass = "block text-sm font-semibold text-gray-700 mb-1";
 
@@ -149,15 +161,24 @@ export default function Prediction() {
 
         {result && (
           <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm animate-fade-in-up">
-            <div className="flex items-center gap-4 mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">Analysis Result</h3>
-              <span className={`px-4 py-1.5 rounded-full text-sm font-bold ${
-                result.probability >= 70 ? 'bg-red-100 text-red-800' : 
-                result.probability >= 45 ? 'bg-yellow-100 text-yellow-800' : 
-                'bg-green-100 text-green-800'
-              }`}>
-                {result.probability >= 70 ? 'High Risk' : result.probability >= 45 ? 'Increased Risk' : 'Low Risk'}
-              </span>
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-4">
+                <h3 className="text-2xl font-bold text-gray-900">Analysis Result</h3>
+                <span className={`px-4 py-1.5 rounded-full text-sm font-bold ${
+                  result.probability >= 70 ? 'bg-red-100 text-red-800' : 
+                  result.probability >= 45 ? 'bg-yellow-100 text-yellow-800' : 
+                  'bg-green-100 text-green-800'
+                }`}>
+                  {result.probability >= 70 ? 'High Risk' : result.probability >= 45 ? 'Increased Risk' : 'Low Risk'}
+                </span>
+              </div>
+
+              <button
+                onClick={() => handleDownloadPDF(result.patient_data_file)}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm flex items-center gap-2 transition-colors"
+              >
+                <span>📥</span> Download PDF Report
+              </button>
             </div>
 
             <div className="text-5xl font-extrabold mb-8 text-gray-900">
@@ -170,7 +191,7 @@ export default function Prediction() {
                 <img src={`data:image/png;base64,${result.shap_plot}`} alt="SHAP Plot" className="w-full object-contain" />
               </div>
             ) : (
-              <p className="text-gray-500 italic">Графік недоступний</p>
+              <p className="text-gray-500 italic">Plot is not available</p>
             )}
           </div>
         )}
@@ -191,22 +212,47 @@ export default function Prediction() {
           ) : (
             <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
               {history.map((item, i) => {
-                const dateStr = item.created_at ? new Date(item.created_at).toLocaleString([], {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'}) : `Check #${history.length - i}`;
+                const dateStr = item.created_at
+                  ? new Date(item.created_at).toLocaleString([], {
+                      day: '2-digit',
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })
+                  : `Check #${history.length - i}`;
+
                 return (
                   <div
                     key={item.id || i}
                     onClick={() => {
-                      setResult({ probability: item.probability, shap_plot: item.shap_image_base64 });
+                      setResult({
+                        probability: item.probability,
+                        shap_plot: item.shap_image_base64,
+                        patient_data_file: item.patient_data_file
+                      });
                       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
                     }}
                     className="group p-3 border border-gray-100 rounded-xl cursor-pointer hover:bg-red-50 hover:border-red-200 transition-all flex justify-between items-center"
                   >
                     <span className="text-sm text-gray-500 group-hover:text-red-700 font-medium">🕒 {dateStr}</span>
-                    <span className={`text-sm font-bold ${item.probability >= 70 ? 'text-red-600' : item.probability >= 45 ? 'text-yellow-600' : 'text-green-600'}`}>
-                      {item.probability?.toFixed(1)}%
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-bold ${item.probability >= 70 ? 'text-red-600' : item.probability >= 45 ? 'text-yellow-600' : 'text-green-600'}`}>
+                        {item.probability?.toFixed(1)}%
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownloadPDF(item.patient_data_file, `Report_${dateStr.replace(/[\\/: ]/g, '_')}.pdf`);
+                        }}
+                        className="text-gray-400 hover:text-red-600 transition-colors p-2 bg-white rounded-full hover:bg-red-100"
+                        title="Download report"
+                        disabled={!item.patient_data_file}
+                      >
+                        📥
+                      </button>
+                    </div>
                   </div>
-                )
+                );
               })}
             </div>
           )}
