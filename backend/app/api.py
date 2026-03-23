@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from fastapi.responses import RedirectResponse
 from fastapi import FastAPI,Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 
 import pandas as pd
 import joblib
@@ -19,7 +20,7 @@ import uuid
 from typing import Optional
 
 from .ml.generate_pdf_file import PatientDataFile
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 from .db.schemas import UserOut, UserCreate, HistoryRead
 from .db.crud import create_user, get_user_by_username, login_user, get_current_user
@@ -29,7 +30,7 @@ from .db.models import UserTable, AnalysisHistory
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-load_dotenv()
+load_dotenv(find_dotenv())
 
 matplotlib.use('Agg')
 
@@ -55,6 +56,14 @@ async def lifespan(app: FastAPI):
     app.state.explainer = None
 
 app = FastAPI(title="Heart Disease API", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class PatientData(BaseModel):
     age:int

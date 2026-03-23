@@ -1,0 +1,23 @@
+# VCS and metadata
+.git
+.gitignore
+
+# Python caches and local env
+**/__pycache__/
+**/*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+
+# Local tooling
+.idea/
+.vscode/
+
+# Frontend build/cache (frontend has its own Docker context)
+frontend/node_modules/
+frontend/dist/
+
+# Large or generated files not needed for runtime image
+backend/migrations/__pycache__/
+
